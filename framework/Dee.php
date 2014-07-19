@@ -1,24 +1,34 @@
 <?php
-define('MDM_PATH', dirname(__FILE__));
+
+define('DEE_PATH', dirname(__FILE__));
 
 /**
- * Description of Mdm
+ * Description of Dee
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class Mdm
+class Dee
 {
     /**
      *
-     * @var MApplication 
+     * @var DApplication 
      */
     public static $app;
-    
+
     /**
      *
      * @var array 
      */
     public static $classMap;
-}
+    public static $aliases = ['@dee' => DEE_PATH];
 
-Mdm::$classMap = require(MDM_PATH.'/classes.php');
+    public static function configure($object, $properties)
+    {
+        foreach ($properties as $name => $value) {
+            $object->$name = $value;
+        }
+
+        return $object;
+    }
+}
+Dee::$classMap = require(DEE_PATH . '/classes.php');

@@ -5,11 +5,11 @@
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class MObject
+class DObject
 {
     public function __construct($config=array())
     {
-        
+        Dee::configure($this, $config);
         $this->init();
     }
     

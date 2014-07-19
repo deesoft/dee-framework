@@ -5,16 +5,17 @@
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class MApplication extends MObject
+class DApplication extends DObject
 {
     
     public function __construct($config = array())
     {
-        Mdm::$app = $this;
+        Dee::$app = $this;
                 
         parent::__construct($config);
     }
 
+    
     public function run()
     {
         

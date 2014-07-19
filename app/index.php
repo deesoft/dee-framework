@@ -1,8 +1,8 @@
 <?php
 
-require(dirname(__FILE__).'/../framework/Mdm.php');
+require(dirname(__FILE__).'/../framework/Dee.php');
 
 $config = require(dirname(__FILE__).'/config/main.php');
 
-$app = new MApplication($config);
+$app = new DApplication($config);
 $app->run();
