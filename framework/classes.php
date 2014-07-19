@@ -1,10 +1,10 @@
 <?php
 
 return array(
-    'MApplication' => MDM_PATH . '/core/MApplication.php',
-    'MObject' => MDM_PATH . '/core/MObject.php',
-    'MController' => MDM_PATH . '/core/MController.php',
-    'MRequest' => MDM_PATH . '/core/MRequest.php',
-    'MResponse' => MDM_PATH . '/core/MResponse.php',
-    'MView' => MDM_PATH . '/core/MView.php',
+    'DApplication' => MDM_PATH . '/core/DApplication.php',
+    'DObject' => MDM_PATH . '/core/DObject.php',
+    'DController' => MDM_PATH . '/core/DController.php',
+    'DRequest' => MDM_PATH . '/core/DRequest.php',
+    'DResponse' => MDM_PATH . '/core/DResponse.php',
+    'DView' => MDM_PATH . '/core/DView.php',
 );
