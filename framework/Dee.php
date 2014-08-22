@@ -11,13 +11,13 @@ class Dee
 {
     /**
      *
-     * @var DApplication 
+     * @var DApplication
      */
     public static $app;
 
     /**
      *
-     * @var array 
+     * @var array
      */
     public static $classMap;
     public static $aliases = ['@dee' => DEE_PATH];
@@ -29,6 +29,26 @@ class Dee
         }
 
         return $object;
+    }
+
+    /**
+     * 
+     * @param mixed $type
+     * @return mixed
+     */
+    public static function createObject($type, $params=array())
+    {
+        
+    }
+
+    /**
+     * 
+     * @param string $alias
+     * @return string
+     */
+    public static function getAlias($alias)
+    {
+        
     }
 }
 Dee::$classMap = require(DEE_PATH . '/classes.php');
