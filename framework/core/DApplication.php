@@ -4,6 +4,7 @@
  * Description of DApplication
  *
  * @property DRequest $request
+ * @property DResponse $response
  * @property string $basePath
  * @property string $controllerPath
  * @property DView $view
@@ -12,7 +13,7 @@
  */
 class DApplication extends DObject
 {
-    private $_components = [];
+    private $_components = array();
     public $defaultRoute = 'site';
 
     public function __construct($config = array())
@@ -25,18 +26,27 @@ class DApplication extends DObject
     public function run()
     {
         $request = $this->request;
-        $this->handleRequest($request);
+        $response = $this->handleRequest($request);
+        $response->send();
     }
 
     /**
      * 
      * @param DRequest $request
+     * @return DResponse
      */
     protected function handleRequest($request)
     {
         list($route, $params) = $request->resolve();
-        $response = $this->runAction($route, $params);
-        
+        $result = $this->runAction($route, $params);
+        if ($result instanceof DResponse) {
+            return $result;
+        }
+        $response = $this->response;
+        if ($result !== null) {
+            $response->data = $result;
+        }
+        return $response;
     }
 
     public function runAction($route, $params)
@@ -69,7 +79,7 @@ class DApplication extends DObject
             $id = $route;
             $route = '';
         }
-        
+
         $controller = $this->createControllerByID($id);
         if ($controller === null && $route !== '') {
             $controller = $this->createControllerByID($id . '/' . $route);
@@ -98,11 +108,11 @@ class DApplication extends DObject
         $fileName = $this->controllerPath . '/' . $prefix . $className . '.php';
         if (is_file($fileName)) {
             include_once($fileName);
-        }  else {
+        } else {
             return null;
         }
 
-        if (class_exists($className,false) && is_subclass_of($className, 'DController')) {
+        if (class_exists($className, false) && is_subclass_of($className, 'DController')) {
             return Dee::createObject($className, [$id]);
         } else {
             return null;

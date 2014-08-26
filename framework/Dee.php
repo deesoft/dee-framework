@@ -35,12 +35,43 @@ class Dee
 
     /**
      * 
-     * @param mixed $type
+     * @param mixed $config
      * @return mixed
      */
-    public static function createObject($type, $params = array())
+    public static function createObject($config, $params = array())
     {
-        
+        if (is_string($config)) {
+            $type = $config;
+            $config = array();
+        } elseif (isset($config['class'])) {
+            $type = $config['class'];
+            unset($config['class']);
+        } else {
+            throw new Exception('Object configuration must be an array containing a "class" element.');
+        }
+        if (!class_exists($type, false)) {
+            $type = static::import($type, true);
+        }
+
+        $reflection = new ReflectionClass($type);
+
+        $constructor = $reflection->getConstructor();
+        if ($constructor !== null) {
+            $i = 0;
+            foreach ($constructor->getParameters() as $param) {
+                if (!isset($params[$i]) && $param->isDefaultValueAvailable()) {
+                    $params[$i] = $param->getDefaultValue();
+                } else {
+                    throw new Exception("Missing required parameter \"{$param->getName()}\" when instantiating \"{$type}\".");
+                }
+                $i++;
+            }
+            $params[] = $config;
+            $object = $reflection->newInstanceArgs($params);
+        } else {
+            $object = new $type();
+        }
+        return $object;
     }
 
     /**
