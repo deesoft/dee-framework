@@ -10,6 +10,7 @@ class DController extends DObject
     public $id;
     public $defaultAction = 'index';
     public $actionParams = array();
+    public $layout = '/layouts/main';
 
     public function __construct($id, $config = array())
     {
@@ -71,4 +72,20 @@ class DController extends DObject
         $this->actionParams = $actionParams;
         return call_user_func_array(array($this, $method->getName()), $args);
     }
+    
+    public function render($view,$params=array())
+    {
+        $content = Dee::$app->view->render($view, $params, $this);
+        $layout = Dee::$app->getViewPath().'/'.$this->layout.'.php';
+        if(is_file($layout)){
+            $content = Dee::$app->view->renderFile($layout, array('content'=>$content));
+        }
+        return $content;
+    }
+    
+    public function renderPartial($view,$params=array())
+    {
+        return Dee::$app->view->render($view, $params, $this);
+    }
+    
 }

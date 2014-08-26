@@ -6,6 +6,7 @@
  * @property DRequest $request
  * @property string $basePath
  * @property string $controllerPath
+ * @property DView $view
  * 
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
@@ -35,6 +36,7 @@ class DApplication extends DObject
     {
         list($route, $params) = $request->resolve();
         $response = $this->runAction($route, $params);
+        
     }
 
     public function runAction($route, $params)
@@ -195,6 +197,9 @@ class DApplication extends DObject
         $coreComponets = array(
             'request' => array(
                 'class' => 'DRequest',
+            ),
+            'response' => array(
+                'class' => 'DResponse'
             )
         );
         $this->_components = array_merge_recursive($coreComponets, $this->_components);

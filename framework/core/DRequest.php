@@ -10,7 +10,7 @@ class DRequest extends DObject
 
     public function resolve()
     {
-        
+        return array($this->get('r', ''), $this->get());
     }
 
     public function post($name = null, $default = null)
