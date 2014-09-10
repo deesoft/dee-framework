@@ -7,20 +7,26 @@
  * @property DResponse $response
  * @property string $basePath
  * @property string $controllerPath
+ * @property string $runtimePath
+ * @property string $viewPath
  * @property DView $view
- * 
+ * @property DController $controller
+ *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
 class DApplication extends DObject
 {
     private $_components = array();
     public $defaultRoute = 'site';
+    public $controller;
+    public $layout = 'main';
 
     public function __construct($config = array())
     {
         Dee::$app = $this;
         $this->initCoreComponents();
         parent::__construct($config);
+        Dee::setAlias('@app', $this->basePath);
     }
 
     public function run()
@@ -31,8 +37,8 @@ class DApplication extends DObject
     }
 
     /**
-     * 
-     * @param DRequest $request
+     *
+     * @param  DRequest  $request
      * @return DResponse
      */
     protected function handleRequest($request)
@@ -46,6 +52,7 @@ class DApplication extends DObject
         if ($result !== null) {
             $response->data = $result;
         }
+
         return $response;
     }
 
@@ -55,10 +62,10 @@ class DApplication extends DObject
         if (is_array($parts)) {
             /* @var $controller Controller */
             list($controller, $actionID) = $parts;
-            $oldController = Yii::$app->controller;
-            Yii::$app->controller = $controller;
+            $oldController = Dee::$app->controller;
+            Dee::$app->controller = $controller;
             $result = $controller->runAction($actionID, $params);
-            Yii::$app->controller = $oldController;
+            Dee::$app->controller = $oldController;
 
             return $result;
         } else {
@@ -72,7 +79,7 @@ class DApplication extends DObject
             $route = $this->defaultRoute;
         }
         $route = trim($route, '/');
-        if ($pos = strrpos($route, '/') !== false) {
+        if (($pos = strrpos($route, '/')) !== false) {
             $id = substr($route, 0, $pos);
             $route = substr($route, $pos + 1);
         } else {
@@ -125,6 +132,7 @@ class DApplication extends DObject
             if (!is_object($this->_components[$name])) {
                 $this->_components[$name] = Dee::createObject($this->_components[$name]);
             }
+
             return $this->_components[$name];
         } elseif ($throwException) {
             throw new Exception("Unknown component ID: $name");
@@ -162,11 +170,12 @@ class DApplication extends DObject
                 $result[$name] = $value;
             }
         }
+
         return $result;
     }
     /**
      *
-     * @var string 
+     * @var string
      */
     private $_basePath;
 
@@ -185,7 +194,7 @@ class DApplication extends DObject
     }
     /**
      *
-     * @var string 
+     * @var string
      */
     private $_controllerPath;
 
@@ -194,12 +203,75 @@ class DApplication extends DObject
         if ($this->_controllerPath === null) {
             $this->_controllerPath = $this->basePath . '/controllers';
         }
+
         return $this->_controllerPath;
     }
 
     public function setControllerPath($value)
     {
-        $this->_controllerPath = $value;
+        $this->_controllerPath = Dee::getAlias($value);
+    }
+    /**
+     *
+     * @var string
+     */
+    private $_runtimePath;
+
+    public function getRuntimePath()
+    {
+        if ($this->_runtimePath === null) {
+            $this->_runtimePath = $this->basePath . '/runtime';
+        }
+
+        return $this->_runtimePath;
+    }
+
+    public function setRuntimePath($value)
+    {
+        $this->_runtimePath = Dee::getAlias($value);
+    }
+    /**
+     *
+     * @var string
+     */
+    private $_viewPath;
+
+    public function getViewPath()
+    {
+        if ($this->_viewPath === null) {
+            $this->_viewPath = $this->basePath . '/views';
+        }
+
+        return $this->_viewPath;
+    }
+
+    public function setViewPath($value)
+    {
+        $this->_viewPath = Dee::getAlias($value);
+    }
+    private $_layoutPath;
+
+    /**
+     * Returns the directory that contains layout view files for this module.
+     * @return string the root directory of layout files. Defaults to "[[viewPath]]/layouts".
+     */
+    public function getLayoutPath()
+    {
+        if ($this->_layoutPath !== null) {
+            return $this->_layoutPath;
+        } else {
+            return $this->_layoutPath = $this->getViewPath() . DIRECTORY_SEPARATOR . 'layouts';
+        }
+    }
+
+    /**
+     * Sets the directory that contains the layout files.
+     * @param string $path the root directory or path alias of layout files.
+     * @throws InvalidParamException if the directory is invalid
+     */
+    public function setLayoutPath($path)
+    {
+        $this->_layoutPath = Dee::getAlias($path);
     }
 
     protected function initCoreComponents()
@@ -210,6 +282,9 @@ class DApplication extends DObject
             ),
             'response' => array(
                 'class' => 'DResponse'
+            ),
+            'view' => array(
+                'class' => 'DView'
             )
         );
         $this->_components = array_merge_recursive($coreComponets, $this->_components);

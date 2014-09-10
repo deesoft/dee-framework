@@ -1,4 +1,4 @@
-mdm-framework
+Dee Framework
 =============
 
 Simple PHP MVC Framework

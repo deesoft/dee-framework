@@ -10,7 +10,7 @@ class DController extends DObject
     public $id;
     public $defaultAction = 'index';
     public $actionParams = array();
-    public $layout = '/layouts/main';
+    public $layout = 'main';
 
     public function __construct($id, $config = array())
     {
@@ -72,20 +72,71 @@ class DController extends DObject
         $this->actionParams = $actionParams;
         return call_user_func_array(array($this, $method->getName()), $args);
     }
-    
-    public function render($view,$params=array())
+
+    public function render($view, $params = array())
     {
-        $content = Dee::$app->view->render($view, $params, $this);
-        $layout = Dee::$app->getViewPath().'/'.$this->layout.'.php';
-        if(is_file($layout)){
-            $content = Dee::$app->view->renderFile($layout, array('content'=>$content));
+        $output = $this->getView()->render($view, $params, $this);
+        $layoutFile = $this->findLayoutFile($this->getView());
+        if ($layoutFile !== false) {
+            return $this->getView()->renderFile($layoutFile, ['content' => $output], $this);
+        } else {
+            return $output;
         }
-        return $content;
     }
-    
-    public function renderPartial($view,$params=array())
+
+    public function renderPartial($view, $params = array())
     {
         return Dee::$app->view->render($view, $params, $this);
     }
-    
+
+    public function getViewPath()
+    {
+        return Dee::$app->getViewPath() . '/' . $this->id;
+    }
+    private $_view;
+
+    /**
+     * 
+     * @return DView
+     */
+    public function getView()
+    {
+        if ($this->_view === null) {
+            $this->_view = Dee::$app->view;
+        }
+        return $this->_view;
+    }
+
+    public function setView($value)
+    {
+        $this->_view = $value;
+    }
+
+    /**
+     * 
+     * @param DView $view
+     */
+    public function findLayoutFile()
+    {
+        $app = Dee::$app;
+        if (is_string($this->layout)) {
+            $layout = $this->layout;
+        } elseif ($this->layout === null) {
+            $layout = $app->layout;
+        }
+
+        if (!isset($layout)) {
+            return false;
+        }
+        if (strncmp($layout, '@', 1) === 0) {
+            $file = Dee::getAlias($layout);
+        } else {
+            $file = $app->getLayoutPath() . DIRECTORY_SEPARATOR . trim($layout, '/');
+        }
+
+        if (pathinfo($file, PATHINFO_EXTENSION) !== '') {
+            return $file;
+        }
+        return $file . '.php';
+    }
 }

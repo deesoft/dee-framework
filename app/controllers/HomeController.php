@@ -9,10 +9,11 @@ class HomeController extends DController
 {
     public function actionIndex()
     {
-        return [
-            'a'=>['a','b',3],
-            'b'=>2,
-            3
-        ];
+        return 'Hello World!';
+    }
+    
+    public function actionView()
+    {
+        return $this->render('test');
     }
 }

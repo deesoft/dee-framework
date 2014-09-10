@@ -36,8 +36,10 @@ class DResponse extends DObject
 
     protected function sendCookie()
     {
+        $key = Dee::$app->request->cookieValidationKey;
         foreach ($this->_cookies as $name => $value) {
             list($value, $expire) = $value;
+            $value = DHelper::hashData($value,$key);
             setcookie($name, $value, $expire);
         }
     }

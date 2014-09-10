@@ -53,16 +53,19 @@ class Dee
             $type = static::import($type, true);
         }
 
+
         $reflection = new ReflectionClass($type);
 
         $constructor = $reflection->getConstructor();
         if ($constructor !== null) {
             $i = 0;
             foreach ($constructor->getParameters() as $param) {
-                if (!isset($params[$i]) && $param->isDefaultValueAvailable()) {
-                    $params[$i] = $param->getDefaultValue();
-                } else {
-                    throw new Exception("Missing required parameter \"{$param->getName()}\" when instantiating \"{$type}\".");
+                if (!isset($params[$i])) {
+                    if ($param->isDefaultValueAvailable()) {
+                        $params[$i] = $param->getDefaultValue();
+                    } else {
+                        throw new Exception("Missing required parameter \"{$param->getName()}\" when instantiating \"{$type}\".");
+                    }
                 }
                 $i++;
             }
@@ -131,15 +134,30 @@ class Dee
 
     public static function import($alias, $forceInclude = false)
     {
-        if (isset(static::$imports[$alias])) {
-            return static::$imports[$alias];
-        }
         if (class_exists($alias, false) || interface_exists($alias, false)) {
             return static::$imports[$alias] = $alias;
         }
-        if (($pos = strrpos($alias, '/')) === false) {
-            
+        if (isset(static::$imports[$alias])) {
+            return static::$imports[$alias];
         }
+        if (($pos = strrpos($alias, '/')) !== false) {
+            $class = substr($alias, $pos + 1);
+            if ($class === '*') {
+                static::$includePaths[] = static::getAlias('@' . substr($alias, 0, $pos));
+                static::$includePaths = array_unique(static::$includePaths);
+            } else {
+                $path = static::getAlias('@' . $alias);
+                static::$classMap[$class] = $path;
+                if ($forceInclude) {
+                    include $path;
+                }
+                return static::$imports[$alias] = $class;
+            }
+        } else {
+            return $alias;
+        }
+        return false;
     }
 }
 Dee::$classMap = require(DEE_PATH . '/classes.php');
+spl_autoload_register(array('Dee', 'autoload'));
