@@ -9,4 +9,5 @@ return array(
     'DView' => DEE_PATH . '/core/DView.php',
     'DUser' => DEE_PATH . '/core/DUser.php',
     'DHelper' => DEE_PATH . '/core/DHelper.php',
+    'DDbConnection' => DEE_PATH . '/core/DDbConnection.php',
 );

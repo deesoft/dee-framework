@@ -285,6 +285,9 @@ class DApplication extends DObject
             ),
             'view' => array(
                 'class' => 'DView'
+            ),
+            'db' => array(
+                'class' => 'DDbConnection'
             )
         );
         $this->_components = array_merge_recursive($coreComponets, $this->_components);
