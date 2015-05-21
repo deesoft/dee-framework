@@ -6,7 +6,7 @@ use Dee;
 use Exception;
 
 /**
- * Description of DApplication
+ * Description of Application
  *
  * @property DRequest $request
  * @property DResponse $response
@@ -17,7 +17,8 @@ use Exception;
  * @property DView $view
  * @property DController $controller
  *
- * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
+ * @author Misbahul D Munir <misbahuldmunir@gmail.com>
+ * @since 1.0
  */
 class Application extends Object
 {

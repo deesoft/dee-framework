@@ -7,9 +7,10 @@ use ReflectionMethod;
 use Exception;
 
 /**
- * Description of DController
+ * Description of Controller
  *
- * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
+ * @author Misbahul D Munir <misbahuldmunir@gmail.com>
+ * @since 1.0
  */
 class Controller extends Object
 {

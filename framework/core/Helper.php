@@ -3,10 +3,12 @@
 namespace dee\core;
 
 use Dee;
+
 /**
  * Description of DHelper
  *
- * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
+ * @author Misbahul D Munir <misbahuldmunir@gmail.com>
+ * @since 1.0
  */
 class Helper
 {

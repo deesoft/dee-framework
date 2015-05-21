@@ -9,7 +9,9 @@ use Dee;
  * Description of User
  *
  * @property string $id
- * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
+ *
+ * @author Misbahul D Munir <misbahuldmunir@gmail.com>
+ * @since 1.0
  */
 class User extends Object
 {

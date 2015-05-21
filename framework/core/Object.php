@@ -3,11 +3,13 @@
 namespace dee\core;
 
 use Dee;
+use Exception;
 
 /**
- * Description of MObject
+ * Description of Object
  *
- * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
+ * @author Misbahul D Munir <misbahuldmunir@gmail.com>
+ * @since 1.0
  */
 class Object implements Configurable
 {

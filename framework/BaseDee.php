@@ -56,10 +56,12 @@ class BaseDee
      * @see autoload()
      */
     public static $classMap = [];
+
     /**
      * @var \yii\console\Application|\yii\web\Application the application instance
      */
     public static $app;
+
     /**
      * @var array registered path aliases
      * @see getAlias()
@@ -72,7 +74,6 @@ class BaseDee
         foreach ($properties as $name => $value) {
             $object->$name = $value;
         }
-
         return $object;
     }
 

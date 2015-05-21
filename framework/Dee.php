@@ -9,8 +9,7 @@ require(__DIR__ . '/BaseDee.php');
  */
 class Dee extends \dee\BaseDee
 {
-
+    
 }
-
 Dee::$classMap = require(__DIR__ . '/classes.php');
 spl_autoload_register(['Dee', 'autoload']);

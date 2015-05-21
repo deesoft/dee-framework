@@ -7,7 +7,8 @@ use Dee;
 /**
  * Description of Request
  *
- * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
+ * @author Misbahul D Munir <misbahuldmunir@gmail.com>
+ * @since 1.0
  */
 class Request extends Object
 {
@@ -37,11 +38,11 @@ class Request extends Object
             return [$this->get($this->routeVar, ''), $this->get()];
         }
     }
-
     private $_bodyParams;
+
     public function post($name = null, $default = null)
     {
-        if($this->_bodyParams === null){
+        if ($this->_bodyParams === null) {
             
         }
         if ($name === null) {
