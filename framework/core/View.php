@@ -1,27 +1,32 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
+use Exception;
+
 /**
  * Description of DView
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DView extends DObject
+class View extends Object
 {
-    private $_viewFiles = array();
-    public $params = array();
+    private $_viewFiles = [];
+    public $params = [];
     public $context;
     public $title = '';
 
-    public function render($view, $params = array(), $context = null)
+    public function render($view, $params = [], $context = null)
     {
         $viewFile = $this->findViewFile($view, $context);
         return $this->renderFile($viewFile, $params, $context);
     }
 
     /**
-     * 
+     *
      * @param string $view
-     * @param DController $context
+     * @param Controller $context
      * @return string
      * @throws Exception
      */
@@ -29,14 +34,14 @@ class DView extends DObject
     {
         if (strncmp($view, '@', 1) === 0) {
             // e.g. "@app/views/main"
-            $file = Yii::getAlias($view);
+            $file = Dee::getAlias($view);
         } elseif (strncmp($view, '/', 1) === 0) {
             // e.g. "//layouts/main"
             $file = Dee::$app->getViewPath() . DIRECTORY_SEPARATOR . ltrim($view, '/');
         } elseif ($context !== null) {
             $file = $context->getViewPath() . DIRECTORY_SEPARATOR . $view;
         } elseif (($currentView = $this->getViewFile()) !== false) {
-            $file = dirname($currentViewFile) . DIRECTORY_SEPARATOR . $view;
+            $file = dirname($currentView) . DIRECTORY_SEPARATOR . $view;
         } else {
             throw new Exception("Invalid render view {$view}");
         }
@@ -46,7 +51,7 @@ class DView extends DObject
         return $file . '.php';
     }
 
-    public function renderFile($viewFile, $params = array(), $context = null)
+    public function renderFile($viewFile, $params = [], $context = null)
     {
         $viewFile = Dee::getAlias($viewFile);
         $oldContext = $this->context;
@@ -60,7 +65,7 @@ class DView extends DObject
         return $output;
     }
 
-    public function renderInternal($_viewFile_, $_params_ = array())
+    public function renderInternal($_viewFile_, $_params_ = [])
     {
         extract($_params_, EXTR_PREFIX_SAME, 'data');
         ob_start();

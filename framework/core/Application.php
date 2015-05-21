@@ -1,5 +1,10 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
+use Exception;
+
 /**
  * Description of DApplication
  *
@@ -14,19 +19,65 @@
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DApplication extends DObject
+class Application extends Object
 {
-    private $_components = array();
+    private $_components = [];
     public $defaultRoute = 'site';
     public $controller;
     public $layout = 'main';
 
-    public function __construct($config = array())
+    /**
+     * @var string the namespace that controller classes are located in.
+     * This namespace will be used to load controller classes by prepending it to the controller class name.
+     * The default namespace is `app\controllers`.
+     *
+     * Please refer to the [guide about class autoloading](guide:concept-autoloading.md) for more details.
+     */
+    public $controllerNamespace = 'app\\controllers';
+
+    public function __construct($config = [])
     {
         Dee::$app = $this;
-        $this->initCoreComponents();
+        $this->preInit($config);
+        
         parent::__construct($config);
-        Dee::setAlias('@app', $this->basePath);
+    }
+
+    public function preInit(&$config)
+    {
+        if (isset($config['basePath'])) {
+            $this->setBasePath($config['basePath']);
+            unset($config['basePath']);
+        } else {
+            throw new Exception('The "basePath" configuration for the Application is required.');
+        }
+        
+        if (isset($config['runtimePath'])) {
+            $this->setRuntimePath($config['runtimePath']);
+            unset($config['runtimePath']);
+        } else {
+            // set "@runtime"
+            $this->getRuntimePath();
+        }
+        
+        // merge core components with custom components
+        foreach ($this->coreComponents() as $id => $component) {
+            if (!isset($config['components'][$id])) {
+                $config['components'][$id] = $component;
+            } elseif (is_array($config['components'][$id]) && !isset($config['components'][$id]['class'])) {
+                $config['components'][$id]['class'] = $component['class'];
+            }
+        }
+        $this->registerErrorHandler($config);
+    }
+
+    public function registerErrorHandler(&$config)
+    {
+        if(isset($config['components']['errorHandler'])){
+            $this->set('errorHandler', $config['components']['errorHandler']);
+            unset($config['components']['errorHandler']);
+            $this->errorHandler->register();
+        }
     }
 
     public function run()
@@ -45,7 +96,7 @@ class DApplication extends DObject
     {
         list($route, $params) = $request->resolve();
         $result = $this->runAction($route, $params);
-        if ($result instanceof DResponse) {
+        if ($result instanceof Response) {
             return $result;
         }
         $response = $this->response;
@@ -59,13 +110,14 @@ class DApplication extends DObject
     public function runAction($route, $params)
     {
         $parts = $this->createController($route);
+        
         if (is_array($parts)) {
             /* @var $controller Controller */
             list($controller, $actionID) = $parts;
-            $oldController = Dee::$app->controller;
-            Dee::$app->controller = $controller;
+            $oldController = $this->controller;
+            $this->controller = $controller;
             $result = $controller->runAction($actionID, $params);
-            Dee::$app->controller = $oldController;
+            $this->controller = $oldController;
 
             return $result;
         } else {
@@ -75,18 +127,28 @@ class DApplication extends DObject
 
     public function createController($route)
     {
-        if (empty($route)) {
+        if ($route === '') {
             $route = $this->defaultRoute;
         }
+
+        // double slashes or leading/ending slashes may cause substr problem
         $route = trim($route, '/');
-        if (($pos = strrpos($route, '/')) !== false) {
-            $id = substr($route, 0, $pos);
-            $route = substr($route, $pos + 1);
+        if (strpos($route, '//') !== false) {
+            return false;
+        }
+
+        if (strpos($route, '/') !== false) {
+            list ($id, $route) = explode('/', $route, 2);
         } else {
             $id = $route;
             $route = '';
         }
 
+        if (($pos = strrpos($route, '/')) !== false) {
+            $id .= '/' . substr($route, 0, $pos);
+            $route = substr($route, $pos + 1);
+        }
+        
         $controller = $this->createControllerByID($id);
         if ($controller === null && $route !== '') {
             $controller = $this->createControllerByID($id . '/' . $route);
@@ -98,10 +160,6 @@ class DApplication extends DObject
 
     protected function createControllerById($id)
     {
-        if (!preg_match('%^[a-z0-9\\-_/]+$%', $id)) {
-            return null;
-        }
-
         $pos = strrpos($id, '/');
         if ($pos === false) {
             $prefix = '';
@@ -111,16 +169,25 @@ class DApplication extends DObject
             $className = substr($id, $pos + 1);
         }
 
-        $className = str_replace(' ', '', ucwords(str_replace('-', ' ', $className))) . 'Controller';
-        $fileName = $this->controllerPath . '/' . $prefix . $className . '.php';
-        if (is_file($fileName)) {
-            include_once($fileName);
-        } else {
+        if (!preg_match('%^[a-z][a-z0-9\\-_]*$%', $className)) {
+            return null;
+        }
+        if ($prefix !== '' && !preg_match('%^[a-z0-9_/]+$%i', $prefix)) {
             return null;
         }
 
-        if (class_exists($className, false) && is_subclass_of($className, 'DController')) {
-            return Dee::createObject($className, [$id]);
+        $className = str_replace(' ', '', ucwords(str_replace('-', ' ', $className))) . 'Controller';
+        $className = ltrim($this->controllerNamespace . '\\' . str_replace('/', '\\', $prefix) . $className, '\\');
+
+        if (strpos($className, '-') !== false || !class_exists($className)) {
+            return null;
+        }
+        
+        if (is_subclass_of($className, 'dee\core\Controller')) {
+            $controller = Dee::createObject($className, [$id]);
+            return get_class($controller) === $className ? $controller : null;
+        } elseif (DEE_DEBUG) {
+            throw new Exception("Controller class must extend from \\dee\\core\\Controller.");
         } else {
             return null;
         }
@@ -139,6 +206,11 @@ class DApplication extends DObject
         } else {
             return null;
         }
+    }
+
+    public function has($name)
+    {
+        return isset($this->_components[$name]);
     }
 
     public function __get($name)
@@ -181,35 +253,19 @@ class DApplication extends DObject
 
     public function getBasePath()
     {
-        if ($this->_basePath === null) {
-            throw new Exception('The "basePath" option must be specified.');
+        return $this->_basePath;
+    }
+
+    public function setBasePath($path)
+    {
+        $path = Dee::getAlias($path);
+        $p = realpath($path);
+        if ($p !== false && is_dir($p)) {
+            $this->_basePath = $p;
+            Dee::setAlias('@app', $p);
         } else {
-            return $this->_basePath;
+            throw new Exception("The directory does not exist: $path");
         }
-    }
-
-    public function setBasePath($value)
-    {
-        $this->_basePath = $value;
-    }
-    /**
-     *
-     * @var string
-     */
-    private $_controllerPath;
-
-    public function getControllerPath()
-    {
-        if ($this->_controllerPath === null) {
-            $this->_controllerPath = $this->basePath . '/controllers';
-        }
-
-        return $this->_controllerPath;
-    }
-
-    public function setControllerPath($value)
-    {
-        $this->_controllerPath = Dee::getAlias($value);
     }
     /**
      *
@@ -219,16 +275,17 @@ class DApplication extends DObject
 
     public function getRuntimePath()
     {
+        
         if ($this->_runtimePath === null) {
             $this->_runtimePath = $this->basePath . '/runtime';
         }
-
+        
         return $this->_runtimePath;
     }
 
-    public function setRuntimePath($value)
+    public function setRuntimePath($path)
     {
-        $this->_runtimePath = Dee::getAlias($value);
+        $this->_runtimePath = Dee::getAlias($path);
     }
     /**
      *
@@ -245,9 +302,9 @@ class DApplication extends DObject
         return $this->_viewPath;
     }
 
-    public function setViewPath($value)
+    public function setViewPath($path)
     {
-        $this->_viewPath = Dee::getAlias($value);
+        $this->_viewPath = Dee::getAlias($path);
     }
     private $_layoutPath;
 
@@ -274,22 +331,14 @@ class DApplication extends DObject
         $this->_layoutPath = Dee::getAlias($path);
     }
 
-    protected function initCoreComponents()
+    protected function coreComponents()
     {
-        $coreComponets = array(
-            'request' => array(
-                'class' => 'DRequest',
-            ),
-            'response' => array(
-                'class' => 'DResponse'
-            ),
-            'view' => array(
-                'class' => 'DView'
-            ),
-            'db' => array(
-                'class' => 'DDbConnection'
-            )
-        );
-        $this->_components = array_merge_recursive($coreComponets, $this->_components);
+        return [
+            'request' => ['class' => 'dee\core\Request'],
+            'response' => ['class' => 'dee\core\Response'],
+            'view' => ['class' => 'dee\core\View'],
+            'db' => ['class' => 'dee\core\DbConnection'],
+            'errorHandler' => ['class' => 'dee\core\ErrorHandler'],
+        ];
     }
 }

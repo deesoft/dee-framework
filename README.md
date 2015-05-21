@@ -1,4 +1,5 @@
 Dee Framework
 =============
 
-Simple PHP MVC Framework
+Simple PHP Framework
+

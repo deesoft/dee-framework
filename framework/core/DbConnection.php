@@ -1,11 +1,15 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
+
 /**
  * Description of DDbConnection
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DDbConnection extends DObject
+class DbConnection extends Object
 {
     /**
      * @var string the Data Source Name, or DSN, contains the information required to connect to the database.
@@ -42,7 +46,7 @@ class DDbConnection extends DObject
     private $_pdo;
 
     /**
-     * @var string Custom PDO wrapper class. If not set, it will use "PDO" or "yii\db\mssql\PDO" when MSSQL is used.
+     * @var string Custom PDO wrapper class.
      */
     public $pdoClass;
 

@@ -1,28 +1,35 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
+use ReflectionMethod;
+use Exception;
+
 /**
  * Description of DController
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DController extends DObject
+class Controller extends Object
 {
     public $id;
     public $defaultAction = 'index';
-    public $actionParams = array();
+    public $actionParams = [];
     public $layout = 'main';
 
-    public function __construct($id, $config = array())
+    public function __construct($id, $config = [])
     {
         $this->id = $id;
         parent::__construct($config);
     }
 
-    public function runAction($id, $params = array())
+    public function runAction($id, $params = [])
     {
         if (empty($id)) {
             $id = $this->defaultAction;
         }
+        
         if (preg_match('/^[a-z0-9\\-_]+$/', $id) && strpos($id, '--') === false && trim($id, '-') === $id) {
             $methodName = 'action' . str_replace(' ', '', ucwords(implode(' ', explode('-', $id))));
             if (method_exists($this, $methodName)) {
@@ -37,20 +44,20 @@ class DController extends DObject
     }
 
     /**
-     * 
+     *
      * @param ReflectionMethod $method
      * @param array $params
      */
-    public function runWithParams($method, $params = array())
+    public function runWithParams($method, $params = [])
     {
-        $args = array();
-        $missing = array();
-        $actionParams = array();
+        $args = [];
+        $missing = [];
+        $actionParams = [];
         foreach ($method->getParameters() as $param) {
             $name = $param->getName();
             if (array_key_exists($name, $params)) {
                 if ($param->isArray()) {
-                    $args[] = $actionParams[$name] = is_array($params[$name]) ? $params[$name] : array($params[$name]);
+                    $args[] = $actionParams[$name] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
                 } elseif (!is_array($params[$name])) {
                     $args[] = $actionParams[$name] = $params[$name];
                 } else {
@@ -63,20 +70,21 @@ class DController extends DObject
                 $missing[] = $name;
             }
         }
-
+        
         if (!empty($missing)) {
-            throw new Exception(strtr('Missing required parameters: {params}', array(
+            throw new Exception(strtr('Missing required parameters: {params}', [
                 'params' => implode(', ', $missing),
-            )));
+            ]));
         }
         $this->actionParams = $actionParams;
-        return call_user_func_array(array($this, $method->getName()), $args);
+        
+        return call_user_func_array([$this, $method->getName()], $args);
     }
 
-    public function render($view, $params = array())
+    public function render($view, $params = [])
     {
         $output = $this->getView()->render($view, $params, $this);
-        $layoutFile = $this->findLayoutFile($this->getView());
+        $layoutFile = $this->findLayoutFile();
         if ($layoutFile !== false) {
             return $this->getView()->renderFile($layoutFile, ['content' => $output], $this);
         } else {
@@ -84,9 +92,9 @@ class DController extends DObject
         }
     }
 
-    public function renderPartial($view, $params = array())
+    public function renderPartial($view, $params = [])
     {
-        return Dee::$app->view->render($view, $params, $this);
+        return $this->getView()->render($view, $params, $this);
     }
 
     public function getViewPath()
@@ -96,8 +104,8 @@ class DController extends DObject
     private $_view;
 
     /**
-     * 
-     * @return DView
+     *
+     * @return View
      */
     public function getView()
     {
@@ -113,8 +121,7 @@ class DController extends DObject
     }
 
     /**
-     * 
-     * @param DView $view
+     *
      */
     public function findLayoutFile()
     {
@@ -125,7 +132,7 @@ class DController extends DObject
             $layout = $app->layout;
         }
 
-        if (!isset($layout)) {
+        if (empty($layout)) {
             return false;
         }
         if (strncmp($layout, '@', 1) === 0) {

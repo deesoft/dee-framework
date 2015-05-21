@@ -1,13 +1,13 @@
 <?php
 
-return array(
+return [
     'basePath' => dirname(dirname(__FILE__)),
     'defaultRoute' => 'home',
-    'components' => array(
-        'db' => array(
+    'components' => [
+        'db' => [
             'dsn' => 'mysql:host=localhost;dbname=mydb',
             'username' => '',
             'password' => ''
-        )
-    )
-);
+        ]
+    ]
+];

@@ -1,13 +1,18 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
+
 /**
  * Description of MObject
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DObject
+class Object implements Configurable
 {
-    public function __construct($config=array())
+
+    public function __construct($config = [])
     {
         Dee::configure($this, $config);
         $this->init();
@@ -157,5 +162,4 @@ class DObject
     {
         return method_exists($this, 'set' . $name) || $checkVars && property_exists($this, $name);
     }
-
 }

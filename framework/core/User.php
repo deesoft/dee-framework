@@ -1,12 +1,17 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
+
+
 /**
- * Description of DUser
+ * Description of User
  *
  * @property string $id
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DUser extends DObject
+class User extends Object
 {
     public $cookieKey = '__identity';
     public $sessionKey = '__identity';

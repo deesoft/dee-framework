@@ -1,19 +1,22 @@
 <?php
 
+namespace app\controllers;
+
 /**
  * Description of HomeController
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class HomeController extends DController
+class HomeController extends \dee\core\Controller
 {
+
     public function actionIndex()
     {
-        return 'Hello World!';
+        return $this->render('index');
     }
-    
-    public function actionView()
+
+    public function actionHallo()
     {
-        return $this->render('test');
+        return 'Hallo World!';
     }
 }

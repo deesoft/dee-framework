@@ -1,13 +1,12 @@
 <?php
-
-return array(
-    'DApplication' => DEE_PATH . '/core/DApplication.php',
-    'DObject' => DEE_PATH . '/core/DObject.php',
-    'DController' => DEE_PATH . '/core/DController.php',
-    'DRequest' => DEE_PATH . '/core/DRequest.php',
-    'DResponse' => DEE_PATH . '/core/DResponse.php',
-    'DView' => DEE_PATH . '/core/DView.php',
-    'DUser' => DEE_PATH . '/core/DUser.php',
-    'DHelper' => DEE_PATH . '/core/DHelper.php',
-    'DDbConnection' => DEE_PATH . '/core/DDbConnection.php',
-);
+return [
+    'dee\core\Application' => DEE_PATH . '/core/Application.php',
+    'dee\core\Object' => DEE_PATH . '/core/Object.php',
+    'dee\core\Controller' => DEE_PATH . '/core/Controller.php',
+    'dee\core\Request' => DEE_PATH . '/core/Request.php',
+    'dee\core\Response' => DEE_PATH . '/core/Response.php',
+    'dee\core\View' => DEE_PATH . '/core/View.php',
+    'dee\core\User' => DEE_PATH . '/core/User.php',
+    'dee\core\Helper' => DEE_PATH . '/core/Helper.php',
+    'dee\core\DbConnection' => DEE_PATH . '/core/DbConnection.php',
+];

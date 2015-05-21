@@ -1,11 +1,14 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
 /**
  * Description of DHelper
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DHelper
+class Helper
 {
 
     public static function getRandomKey($key, $generate = false)
@@ -14,7 +17,7 @@ class DHelper
         if (is_file($file)) {
             $content = json_decode(file_get_contents($file), true);
         } else {
-            $content = array();
+            $content = [];
         }
         if ($generate || !isset($content[$key])) {
             $content[$key] = md5(__FILE__ . time());
@@ -27,10 +30,10 @@ class DHelper
     {
         if ($data = @base64_decode($data) !== false && $data = @unserialize($data) !== false) {
             list($parity, $raw) = $data;
-            $hash = md5(serialize(array(
+            $hash = md5(serialize([
                 $key,
                 __CLASS__,
-                $raw)));
+                $raw]));
 
             if ($hash == $parity) {
                 return $raw;
@@ -41,11 +44,11 @@ class DHelper
 
     public static function hashData($data, $key)
     {
-        $hash = md5(serialize(array(
+        $hash = md5(serialize([
             $key,
             __CLASS__,
-            $data)));
-        return base64_encode(serialize(array($hash, $data)));
+            $data]));
+        return base64_encode(serialize([$hash, $data]));
     }
 
     /**
@@ -72,5 +75,42 @@ class DHelper
         $result = mkdir($path, $mode);
         chmod($path, $mode);
         return $result;
+    }
+
+    /**
+     * Merges two or more arrays into one recursively.
+     * If each array has an element with the same string key value, the latter
+     * will overwrite the former (different from array_merge_recursive).
+     * Recursive merging will be conducted if both arrays have an element of array
+     * type and are having the same key.
+     * For integer-keyed elements, the elements from the latter array will
+     * be appended to the former array.
+     * @param array $a array to be merged to
+     * @param array $b array to be merged from. You can specify additional
+     * arrays via third argument, fourth argument etc.
+     * @return array the merged array (the original arrays are not changed.)
+     */
+    public static function arrayMerge($a, $b)
+    {
+        $args = func_get_args();
+        $res = array_shift($args);
+        while (!empty($args)) {
+            $next = array_shift($args);
+            foreach ($next as $k => $v) {
+                if (is_integer($k)) {
+                    if (isset($res[$k])) {
+                        $res[] = $v;
+                    } else {
+                        $res[$k] = $v;
+                    }
+                } elseif (is_array($v) && isset($res[$k]) && is_array($res[$k])) {
+                    $res[$k] = self::arrayMerge($res[$k], $v);
+                } else {
+                    $res[$k] = $v;
+                }
+            }
+        }
+
+        return $res;
     }
 }

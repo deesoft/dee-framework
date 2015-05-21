@@ -1,20 +1,24 @@
 <?php
 
+namespace dee\core;
+
+use Dee;
+
 /**
- * Description of DResponse
+ * Description of Response
  *
  * @author Misbahul D Munir (mdmunir) <misbahuldmunir@gmail.com>
  */
-class DResponse extends DObject
+class Response extends Object
 {
-    public $headers = array();
-    private $_cookies = array();
+    public $headers = [];
+    private $_cookies = [];
     public $data;
 
     public function send()
     {
-        echo $this->data;
         $this->sendHeader();
+        echo $this->data;
     }
 
     protected function sendHeader()
@@ -39,13 +43,13 @@ class DResponse extends DObject
         $key = Dee::$app->request->cookieValidationKey;
         foreach ($this->_cookies as $name => $value) {
             list($value, $expire) = $value;
-            $value = DHelper::hashData($value,$key);
+            $value = Helper::hashData($value, $key);
             setcookie($name, $value, $expire);
         }
     }
 
     public function addCokie($key, $value, $expire = 0)
     {
-        $this->_cookies[$key] = array($value, $expire);
+        $this->_cookies[$key] = [$value, $expire];
     }
 }
