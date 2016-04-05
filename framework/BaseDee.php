@@ -56,12 +56,10 @@ class BaseDee
      * @see autoload()
      */
     public static $classMap = [];
-
     /**
-     * @var \yii\console\Application|\yii\web\Application the application instance
+     * @var \dee\base\Application the application instance
      */
     public static $app;
-
     /**
      * @var array registered path aliases
      * @see getAlias()
@@ -79,46 +77,94 @@ class BaseDee
 
     /**
      *
-     * @param mixed $config
+     * @param mixed $type
      * @return mixed
      */
-    public static function createObject($config, $params = [])
+    public static function createObject($type, $params = [])
     {
-        if (is_string($config)) {
-            $type = $config;
-            $config = [];
-        } elseif (isset($config['class'])) {
-            $type = $config['class'];
-            unset($config['class']);
-        } else {
+        if (is_string($type)) {
+            return static::get($type, $params);
+        } elseif (is_array($type) && isset($type['class'])) {
+            $class = $type['class'];
+            unset($type['class']);
+            return static::get($class, $params, $type);
+        } elseif (is_callable($type)) {
+            return call_user_func($type, $params);
+        } elseif (is_array($type)) {
             throw new Exception('Object configuration must be an array containing a "class" element.');
+        } else {
+            throw new Exception('Unsupported configuration type: ' . gettype($type));
+        }
+    }
+    private static $_definitions = [];
+
+    public static function set($id, $definition = null)
+    {
+        if ($definition === null) {
+            unset(self::$_definitions[$id]);
+        } else {
+            self::$_definitions[$id] = $definition;
+        }
+    }
+
+    public static function get($class, $params = [], $config = [])
+    {
+        if (isset(self::$_definitions[$class])) {
+            $definition = self::$_definitions[$class];
+            if (is_string($definition)) {
+                $type = $definition;
+            } elseif (is_array($definition)) {
+                $type = isset($definition['class']) ? $definition['class'] : $class;
+                unset($definition['class']);
+                $config = array_merge($definition, $config);
+            } elseif (is_callable($definition)) {
+                return call_user_func($definition, $params, $config);
+            }
+            if ($type !== $class) {
+                return static::get($type, $params, $config);
+            }
         }
 
-        $reflection = new ReflectionClass($type);
+        $reflection = new ReflectionClass($class);
 
         $constructor = $reflection->getConstructor();
         if ($constructor !== null) {
+            $args = [];
             $i = 0;
+            /* @var $param \ReflectionParameter */
             foreach ($constructor->getParameters() as $param) {
-                if (!isset($params[$i])) {
-                    if ($param->isDefaultValueAvailable()) {
-                        $params[$i] = $param->getDefaultValue();
+                $name = $param->getName();
+                if (($c = $param->getClass()) !== null) {
+                    $className = $c->getName();
+                    if (isset($params[0]) && $params[0] instanceof $className) {
+                        $args[$i] = array_shift($params);
+                    } elseif (static::$app->has($name) && ($obj = static::$app->get($name)) instanceof $className) {
+                        $args[$i] = $obj;
                     } else {
-                        throw new Exception("Missing required parameter \"{$param->getName()}\" when instantiating \"{$type}\".");
+                        $args[$i] = static::get($className);
                     }
+                } elseif (count($params)) {
+                    $args[$i] = array_shift($params);
+                } elseif ($param->isDefaultValueAvailable()) {
+                    $args[$i] = $param->getDefaultValue();
+                } elseif (!$param->isOptional()) {
+                    throw new Exception("Missing required parameter \"{$name}\" when instantiating \"{$class}\".");
                 }
                 $i++;
             }
 
-            if (!empty($config) && $reflection->implementsInterface('dee\core\Configurable')) {
-                $params[$i - 1] = $config;
-                return $reflection->newInstanceArgs($params);
+            if (!empty($config) && $reflection->implementsInterface('dee\base\Configurable')) {
+                $args[$i - 1] = $config;
+                return $reflection->newInstanceArgs($args);
             } else {
-                $object = $reflection->newInstanceArgs($params);
+                foreach ($params as $value) {
+                    $args[] = $value;
+                }
+                $object = $reflection->newInstanceArgs($args);
                 return static::configure($object, $config);
             }
         } else {
-            $object = new $type();
+            $object = new $class();
             return static::configure($object, $config);
         }
     }

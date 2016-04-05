@@ -1,12 +1,12 @@
 <?php
 return [
-    'dee\core\Application' => DEE_PATH . '/core/Application.php',
-    'dee\core\Object' => DEE_PATH . '/core/Object.php',
-    'dee\core\Controller' => DEE_PATH . '/core/Controller.php',
-    'dee\core\Request' => DEE_PATH . '/core/Request.php',
-    'dee\core\Response' => DEE_PATH . '/core/Response.php',
-    'dee\core\View' => DEE_PATH . '/core/View.php',
-    'dee\core\User' => DEE_PATH . '/core/User.php',
-    'dee\core\Helper' => DEE_PATH . '/core/Helper.php',
-    'dee\core\DbConnection' => DEE_PATH . '/core/DbConnection.php',
+    'dee\base\Application' => DEE_PATH . '/base/Application.php',
+    'dee\base\Object' => DEE_PATH . '/base/Object.php',
+    'dee\base\Controller' => DEE_PATH . '/base/Controller.php',
+    'dee\base\Request' => DEE_PATH . '/base/Request.php',
+    'dee\base\Response' => DEE_PATH . '/base/Response.php',
+    'dee\base\View' => DEE_PATH . '/base/View.php',
+    'dee\base\User' => DEE_PATH . '/base/User.php',
+    'dee\base\Helper' => DEE_PATH . '/base/Helper.php',
+    'dee\db\Connection' => DEE_PATH . '/db/Connection.php',
 ];

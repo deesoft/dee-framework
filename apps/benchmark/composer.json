@@ -1,0 +1,19 @@
+{
+    "name": "deesoft/dee-app-benchmark",
+    "description": "Dee Benchmark Application",
+    "keywords": ["dee", "framework", "benchmark", "application"],
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/deesoft/dee/issues?state=open",
+        "source": "https://github.com/yiisoft/dee"
+    },
+    "config": {
+        "vendor-dir": "protected/vendor"
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0",
+        "deesoft/dee": ">=1.0.0"
+    }
+}

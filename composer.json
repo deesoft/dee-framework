@@ -1,0 +1,49 @@
+{
+    "name": "deesoft/dee-dev",
+    "description": "Yii PHP Framework Version 2 - Development Package",
+    "keywords": [
+        "dee",
+        "framework"
+    ],
+    "homepage": "http://www.yiiframework.com/",
+    "type": "dee-extension",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Misbahul D Munir",
+            "email": "misbahuldmunir@gmail.com",
+            "homepage": "http://mdmunir.wordpress.com/",
+            "role": "Founder and project lead"
+        }
+    ],
+    "minimum-stability": "dev",
+    "replace": {
+        "deesoft/dee": "self.version"
+    },
+    "require": {
+        "php": ">=5.4.0",
+        "ext-mbstring": "*",
+        "ext-ctype": "*",
+        "lib-pcre": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "dee\\": "framework/"
+        }
+    },
+    "bin": [
+        "framework/dee"
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        },
+        "asset-installer-paths": {
+            "npm-asset-library": "vendor/npm",
+            "bower-asset-library": "vendor/bower"
+        }
+    }
+}
